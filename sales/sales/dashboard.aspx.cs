@@ -52,9 +52,10 @@ namespace sales
                                             from VAL_DATA
                                             where UserModif is not null and month(convert(datetime, FecModif, 103)) = MONTH(GETDATE())
                                             group by UserModif");
-            string q9 = string.Format(@"select a.ID as ID_NEG, a.DNI, a.NomLote, a.RESOLUCION, a.UserModif, b.ID as ID_POS, b.DNI, b.NomLote, b.RESOLUCION
+            string q9 = string.Format(@"select a.ID as ID_NEG, a.DNI, a.NomLote, a.RESOLUCION, a.UserModif, b.ID as ID_POS, b.DNI, b.NomLote, b.RESOLUCION, c.Sugar
                                             from TEMP_SCOR as a
                                             inner join TEMP_SCOR as b on a.Propuesta = b.Propuesta
+                                            inner join VAL_DATA as c on b.Propuesta = c.Propuesta
                                             where a.ID <> b.ID and a.RESOLUCION <> 'Positiva' and b.RESOLUCION = 'Positiva'
                                             and month(convert(datetime,a.FecModif,103)) = month(getdate())
                                             order by b.ID asc");
@@ -141,6 +142,13 @@ namespace sales
                             LtlProc.Text = dt.Rows[i]["CANT"].ToString();
                     }
                 }
+                else
+                {
+                    LtlErron.Text = 0.ToString();
+                    LtlExisten.Text = 0.ToString();
+                    LtlIncon.Text = 0.ToString();
+                    LtlProc.Text = 0.ToString();
+                }
                 dt.Clear();
                 reg4 = cmmd5.ExecuteReader();
                 if (reg4.Read())
@@ -149,9 +157,16 @@ namespace sales
                     string cant = reg4["CANT"].ToString();
                     LtlTotScor.Text = cant;
                 }
+                else
+                {
+                    LtlTotScor.Text = 0.ToString();
+                }
                 dt.Load(cmmd6.ExecuteReader());
                 if (dt.Rows.Count > 0)
                 {
+                    LtlSocrNeg.Text = 0.ToString();
+                    LtlScorErr.Text = 0.ToString();
+                    LtlScorPos.Text = 0.ToString();
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
                         if (dt.Rows[i]["RESOLUCION"].ToString() == "Negativa")
@@ -162,10 +177,18 @@ namespace sales
                             LtlScorPos.Text = dt.Rows[i]["CANT"].ToString();
                     }
                 }
+                else
+                {
+                    LtlScorNeg.Text = 0.ToString();
+                    LtlScorErr.Text = 0.ToString();
+                    LtlScorPos.Text = 0.ToString();
+                }
                 dt.Clear();
                 dt.Load(cmmd7.ExecuteReader());
                 if (dt.Rows.Count > 0)
                 {
+                    LtlJpScor.Text = 0.ToString();
+                    LtlJmScor.Text = 0.ToString();
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
                         if (dt.Rows[i]["UserModif"].ToString() == "jpietrantonio")
@@ -174,10 +197,17 @@ namespace sales
                             LtlJmScor.Text = dt.Rows[i]["CANT"].ToString();
                     }
                 }
+                else
+                {
+                    LtlJpScor.Text = 0.ToString();
+                    LtlJmScor.Text = 0.ToString();
+                }
                 dt.Clear();
                 dt.Load(cmmd8.ExecuteReader());
                 if (dt.Rows.Count > 0)
                 {
+                    LtlJpVal.Text = 0.ToString();
+                    LtlJmVal.Text = 0.ToString();
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
                         if (dt.Rows[i]["UserModif"].ToString() == "jpietrantonio")
@@ -186,19 +216,33 @@ namespace sales
                             LtlJmVal.Text = dt.Rows[i]["CANT"].ToString();
                     }
                 }
+                else
+                {
+                    LtlJpVal.Text = 0.ToString();
+                    LtlJmVal.Text = 0.ToString();
+                }
                 dt.Clear();
                 dt.Load(cmmd9.ExecuteReader());
                 if (dt.Rows.Count > 0)
                 {
                     int countJm = 0; int countJp = 0; bool fst = true;
+                    int emiJm = 0; int emiJp = 0;
                     for (int i = 0; i < dt.Rows.Count; i++)
                     {
                         if (fst)
                         {
                             if (dt.Rows[i]["UserModif"].ToString() == "jmandianes")
+                            {
                                 countJm++;
+                                if (dt.Rows[i]["Sugar"].ToString() == "Emitida")
+                                    emiJm++;
+                            }
                             if (dt.Rows[i]["UserModif"].ToString() == "jpietrantonio")
+                            {
                                 countJp++;
+                                if (dt.Rows[i]["Sugar"].ToString() == "Emitida")
+                                    emiJp++;
+                            }
                             fst = false;
                         }
                         else
@@ -206,14 +250,31 @@ namespace sales
                             if (dt.Rows[i]["ID_POS"].ToString() != dt.Rows[i - 1]["ID_POS"].ToString())
                             {
                                 if (dt.Rows[i]["UserModif"].ToString() == "jmandianes")
+                                {
                                     countJm++;
+                                    if (dt.Rows[i]["Sugar"].ToString() == "Emitida")
+                                        emiJm++;
+                                }
                                 if (dt.Rows[i]["UserModif"].ToString() == "jpietrantonio")
+                                {
                                     countJp++;
+                                    if (dt.Rows[i]["Sugar"].ToString() == "Emitida")
+                                        emiJp++;
+                                }
                             }
                         }
                     }
                     LtlJmOk.Text = countJm.ToString();
                     LtlJpOk.Text = countJp.ToString();
+                    LtlJmEmi.Text = emiJm.ToString();
+                    LtlJpEmi.Text = emiJp.ToString();
+                }
+                else
+                {
+                    LtlJmOk.Text = 0.ToString();
+                    LtlJpOk.Text = 0.ToString();
+                    LtlJmEmi.Text = 0.ToString();
+                    LtlJpEmi.Text = 0.ToString();
                 }
                 conn.Close();
             }

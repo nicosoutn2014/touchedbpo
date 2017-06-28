@@ -443,21 +443,6 @@
           </div>
         </div>
         <!-- ./col -->
-        <div class="col-lg-6 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-green">
-            <div class="inner">
-              <h3><asp:Literal ID="LtlJmOk" runat="server"></asp:Literal></h3>
-
-              <p>Juan Manuel OK</p>
-            </div>
-            <div class="icon">
-              <i class="ion ion-bag"></i>
-            </div>
-            <a href="#" class="small-box-footer">Más info<i class="fa fa-arrow-circle-right"></i></a>
-          </div>
-        </div>
-
           <div class="col-lg-6 col-xs-6">
           <!-- small box -->
           <div class="small-box bg-green">
@@ -472,7 +457,52 @@
             <a href="#" class="small-box-footer">Más info<i class="fa fa-arrow-circle-right"></i></a>
           </div>
         </div>
+
+          <div class="col-lg-6 col-xs-6">
+          <!-- small box -->
+          <div class="small-box bg-green">
+            <div class="inner">
+              <h3><asp:Literal ID="LtlJmOk" runat="server"></asp:Literal></h3>
+
+              <p>Juan Manuel OK</p>
+            </div>
+            <div class="icon">
+              <i class="ion ion-bag"></i>
+            </div>
+            <a href="#" class="small-box-footer">Más info<i class="fa fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
       </div>
+
+        <div class="col-lg-6 col-xs-6">
+          <!-- small box -->
+          <div class="small-box bg-green-gradient">
+            <div class="inner">
+              <h3><asp:Literal ID="LtlJpEmi" runat="server"></asp:Literal></h3>
+
+              <p>Juan Pablo Emitidas</p>
+            </div>
+            <div class="icon">
+              <i class="ion ion-bag"></i>
+            </div>
+            <a href="#" class="small-box-footer">Más info<i class="fa fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+
+        <div class="col-lg-6 col-xs-6">
+          <!-- small box -->
+          <div class="small-box bg-green-gradient">
+            <div class="inner">
+              <h3><asp:Literal ID="LtlJmEmi" runat="server"></asp:Literal></h3>
+
+              <p>Juan Manuel Emitidas</p>
+            </div>
+            <div class="icon">
+              <i class="ion ion-bag"></i>
+            </div>
+            <a href="#" class="small-box-footer">Más info<i class="fa fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
       <!-- /.row -->
     </section>
 
