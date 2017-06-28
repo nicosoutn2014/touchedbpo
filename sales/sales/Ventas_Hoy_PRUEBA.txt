@@ -1,0 +1,3 @@
+﻿ProductorCod	VendedorCod	Producto	fechaVenta	Apellido	Nombre	TipoDNI	DNI	fechaNacimiento	Provincia	Localidad	DireCalle	DireNum	DireDpto	DirePiso	cp	Mail	TarjetaTipo	TarjetaNum	TarjetaVence	IdContacto	Propuesta	Observaciones	ObservacionesBo	Telefono	estado_civil	iva	nacimiento_lugar	profesion	sexo	TelefonoAlt	Banco	Vendedor
+CEPAM	7000	116	01/04/2017	MICO	MICOLAS	4	35957694	12/01/1974	1	ALTE BROWN	EL TORDO	1422	0	0	1846		2	4027850003171211	01/2020	1188918	 		 	1142110858	4	3	 	 	Masculino		0	capa156
+CEPAM	7000	116	01/04/2017	MICO	MICOLAS	4	35957694	12/01/1974	1	ALTE BROWN	EL TORDO	1422	0	0	1846		2	4027850003171211	01/2020	1188918	 		 	1142110858	4	3	 	 	Masculino		0	capa156

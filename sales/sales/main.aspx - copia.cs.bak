@@ -1,0 +1,494 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Text;
+using System.Data;
+using System.Web.Configuration;
+using System.IO;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Data.OleDb;
+using ClosedXML.Excel;
+using System.Net.Mail;
+using System.Net;
+
+namespace sales
+{
+    public partial class _default : System.Web.UI.Page
+    {
+        public string connectionInfo = WebConfigurationManager.AppSettings["connString"];
+        public string user = "";
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (Session.Count < 1)
+                Response.Redirect("default.aspx");
+            if ((string)Session["user_profile"] == "SUPER")
+                Response.Redirect("main2.aspx");
+            user = "https://avatars.discourse.org/v2/letter/" + ((string)Session["user_logged"])[0] + "/f6c823/45.png";
+    }
+
+        protected void BtnCargaVal_Click(object sender, EventArgs e)
+        {
+            if (FileUpload.HasFile)
+            {
+                string FileName = Path.GetFileName(FileUpload.PostedFile.FileName);
+                string Extension = Path.GetExtension(FileUpload.PostedFile.FileName);
+                if(Extension != ".xls")  
+                {
+                    if (Extension != ".xlsx")
+                    {
+                        ScriptManager.RegisterStartupScript(this, this.GetType(), "myalert", "alert('[ERROR] Formato de Archivo no soportado.');", true);
+                        return;
+                    }
+                }
+                string FolderPath = ConfigurationManager.AppSettings["FolderPath"];
+                string FilePath = Server.MapPath(FolderPath + FileName);
+                FileName = FileName.Replace(".xlsx", "");
+                FileName = FileName.Replace(".xls", "");
+                string query = "";
+                bool exists = false;
+                using (var conn = new SqlConnection(connectionInfo))
+                {
+                    query = string.Format(@"SELECT NomLote FROM VAL_DATA WHERE NomLote = '{0}'", FileName);
+                    SqlCommand comm = new SqlCommand(query, conn);
+                    conn.Open();
+                    SqlDataReader reg = null;
+                    reg = comm.ExecuteReader();
+
+                    if (reg.Read())
+                    {
+                        exists = true;
+                    }
+                    conn.Close();
+                }
+                if (exists == false)
+                {
+                    FileUpload.SaveAs(FilePath);
+                    Import_To_Grid(FilePath, Extension);
+                }
+            }
+            else
+            {
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "myalert", "alert('[ERROR] Por Favor Seleccione un Archivo');", true);
+                return;
+            }
+        }
+
+        private void Import_To_Grid(string FilePath, string Extension)
+        {
+            string conStr = "";
+            var connSql = new SqlConnection(connectionInfo);
+            int count = 0;
+
+            switch (Extension)
+            {
+                case ".xls": //Excel 97-03
+                    conStr = ConfigurationManager.ConnectionStrings["Excel03ConString"].ConnectionString;
+                    break;
+                case ".xlsx": //Excel 07
+                    conStr = ConfigurationManager.ConnectionStrings["Excel07ConString"].ConnectionString;
+                    break;
+            }
+
+            try
+            {
+                conStr = String.Format(conStr, FilePath, true);
+                OleDbConnection connExcel = new OleDbConnection(conStr);
+                OleDbCommand cmdExcel = new OleDbCommand();
+                OleDbDataAdapter oda = new OleDbDataAdapter();
+                DataTable dt = new DataTable();
+                DataTable data = new DataTable();
+                DataTable dtSheet = new DataTable();
+                cmdExcel.Connection = connExcel;
+
+                //Lee el nombre de la primer hoja (hacer subida masiva!!)
+
+                connExcel.Open();
+                DataTable dtExcelSchema = new DataTable();
+                dtExcelSchema = connExcel.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null);
+                connExcel.Close();
+
+                if (dtExcelSchema.Rows.Count > 0)
+                {
+                    foreach (DataRow row in dtExcelSchema.Rows)
+                    {
+                        dtSheet.Clear();
+
+                        string SheetName = row["TABLE_NAME"].ToString();
+                        LblNomLotVal.Text = "Lote: " + SheetName.Replace("'", "").Replace("$", "");
+                        string lote = SheetName.Replace("'", "").Replace("$", "");
+                        Session.Add("lote", lote);
+                        dtSheet.Columns.Add("NomLote").DefaultValue = lote;
+                        //Leer data de la primer hoja y llenar dataset
+                        connExcel.Open();
+                        cmdExcel.CommandText = "SELECT * From [" + SheetName + "]";
+                        oda.SelectCommand = cmdExcel;
+                        oda.Fill(dtSheet);
+                        connExcel.Close();
+
+                        using (var conn = new SqlConnection(connectionInfo))
+                        {
+                            using (SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(conn))
+                            {
+                                try
+                                {
+                                    //Set the database table name
+                                    sqlBulkCopy.DestinationTableName = "dbo.VAL_DATA";
+
+                                    //[OPTIONAL]: Map the Excel columns with that of the database table
+                                    sqlBulkCopy.ColumnMappings.Add("NomLote", "NomLote");
+                                    sqlBulkCopy.ColumnMappings.Add("ProductorCod", "ProductorCod");
+                                    sqlBulkCopy.ColumnMappings.Add("VendedorCod", "VendedorCod");
+                                    sqlBulkCopy.ColumnMappings.Add("Producto", "Producto");
+                                    sqlBulkCopy.ColumnMappings.Add("fechaVenta", "fechaVenta");
+                                    sqlBulkCopy.ColumnMappings.Add("Apellido", "Apellido");
+                                    sqlBulkCopy.ColumnMappings.Add("Nombre", "Nombre");
+                                    sqlBulkCopy.ColumnMappings.Add("TipoDNI", "TipoDNI");
+                                    sqlBulkCopy.ColumnMappings.Add("DNI", "DNI");
+                                    sqlBulkCopy.ColumnMappings.Add("fechaNacimiento", "fechaNacimiento");
+                                    sqlBulkCopy.ColumnMappings.Add("Provincia", "Provincia");
+                                    sqlBulkCopy.ColumnMappings.Add("Localidad", "Localidad");
+                                    sqlBulkCopy.ColumnMappings.Add("DireCalle", "DireCalle");
+                                    sqlBulkCopy.ColumnMappings.Add("DireNum", "DireNum");
+                                    sqlBulkCopy.ColumnMappings.Add("DireDpto", "DireDpto");
+                                    sqlBulkCopy.ColumnMappings.Add("DirePiso", "DirePiso");
+                                    sqlBulkCopy.ColumnMappings.Add("cp", "cp");
+                                    sqlBulkCopy.ColumnMappings.Add("Mail", "Mail");
+                                    sqlBulkCopy.ColumnMappings.Add("TarjetaTipo", "TarjetaTipo");
+                                    sqlBulkCopy.ColumnMappings.Add("TarjetaNum", "TarjetaNum");
+                                    sqlBulkCopy.ColumnMappings.Add("TarjetaVence", "TarjetaVence");
+                                    sqlBulkCopy.ColumnMappings.Add("IdContacto", "IdContacto");
+                                    sqlBulkCopy.ColumnMappings.Add("Propuesta", "Propuesta");
+                                    sqlBulkCopy.ColumnMappings.Add("Observaciones", "Observaciones");
+                                    sqlBulkCopy.ColumnMappings.Add("ObservacionesBo", "ObservacionesBo");
+                                    sqlBulkCopy.ColumnMappings.Add("Telefono", "Telefono");
+                                    sqlBulkCopy.ColumnMappings.Add("estado_civil", "estado_civil");
+                                    sqlBulkCopy.ColumnMappings.Add("iva", "iva");
+                                    sqlBulkCopy.ColumnMappings.Add("nacimiento_lugar", "nacimiento_lugar");
+                                    sqlBulkCopy.ColumnMappings.Add("profesion", "profesion");
+                                    sqlBulkCopy.ColumnMappings.Add("sexo", "sexo");
+                                    sqlBulkCopy.ColumnMappings.Add("TelefonoAlt", "TelefonoAlt");
+                                    sqlBulkCopy.ColumnMappings.Add("Banco", "Banco");
+                                    sqlBulkCopy.ColumnMappings.Add("Estado", "Estado");
+                                    sqlBulkCopy.ColumnMappings.Add("ObservacionEstado", "ObservacionEstado");
+                                    RemoveNullColumnFromDataTable(dtSheet);
+                                    conn.Open();
+                                    sqlBulkCopy.WriteToServer(dtSheet);
+                                    conn.Close();
+                                    data = loadData(data);
+                                }
+                                catch (SqlException sqlEx)
+                                {
+                                    ScriptManager.RegisterStartupScript(this, this.GetType(), "myalert", "alert('[ERROR] Ha ocurrido un error, Contactar a Soporte');", true);
+                                    string sqlerro = "alert('[ERROR DESCRIPTION] " + sqlEx.Message + "');";
+                                    ScriptManager.RegisterStartupScript(this, this.GetType(), "myalert", sqlerro, true);
+                                }
+                            }
+                        }
+                    }
+                    if (dtExcelSchema.Rows.Count == 1)
+                    {
+                        dt = data;
+                        //Llenar gridview desde dataset
+                        StringBuilder html = new StringBuilder();
+                        StringBuilder html2 = new StringBuilder();
+
+                        html.Append("<thead>");
+                        html.Append("<tr>");
+                        for (int i = 0; i < dt.Columns.Count; i++)
+                        {
+                            html.Append("<th>");
+                            html.Append(dt.Columns[i].ColumnName.ToString());
+                            html.Append("</th>");
+                        }
+                        html.Append("</tr>");
+                        html.Append("</thead>");
+                        thead.Text = html.ToString();
+                        theadN.Text = html.ToString();
+                        //tfoot.Text = html.ToString();
+                        //tfootN.Text = html.ToString();
+                        
+                        html.Clear();
+                        html.Append("<tbody>");
+                        html2.Append("<tbody>");
+                        bool flag = false;
+                        
+                        for (int j = 0; j < dt.Rows.Count; j++)
+                        {
+                            if (dt.Rows[j]["Estado"].ToString() != "PROCESADO")
+                            {
+                                count++;
+                                flag = true;
+                                if (dt.Rows[j]["Modif"].ToString() == "*")
+                                {
+                                    html2.Append("<tr title=\"");
+                                    html2.Append(dt.Rows[j]["ObservacionEstado"].ToString());
+                                    html2.Append("\" style=\"color:green;\" data-toggle=\"modal\" data-id=\"");
+                                    html2.Append(count.ToString());
+                                    html2.Append("\" data-target=\"#modalRow\" >");
+                                }
+                                else
+                                {
+                                    html2.Append("<tr title=\"");
+                                    html2.Append(dt.Rows[j]["ObservacionEstado"].ToString());
+                                    html2.Append("\" style=\"color:red;\" data-toggle=\"modal\" data-id=\"");
+                                    html2.Append(count.ToString());
+                                    html2.Append("\" data-target=\"#modalRow\" >");
+                                }                                
+                            }
+                            html.Append("<tr>");
+                            for (int k = 0; k < dt.Columns.Count; k++)
+                            {
+                                if (flag)
+                                {
+                                    html2.Append("<td>");
+                                    html2.Append(dt.Rows[j][k].ToString());
+                                    html2.Append("</td>");
+                                }
+                                html.Append("<td>");
+                                html.Append(dt.Rows[j][k].ToString());
+                                html.Append("</td>");
+                            }
+                            if (flag)
+                                html2.Append("</tr>");
+                            html.Append("</tr>");
+                            flag = false;
+                        }
+                        html.Append("</tbody>");
+                        html2.Append("</tbody>");
+                        tbody.Text = html.ToString();
+                        tbodyN.Text = html2.ToString();
+                        html.Clear();
+                        html2.Clear();
+
+                        dt.Clear();
+                        dtSheet.Clear();
+
+                        using (var conn = new SqlConnection(connectionInfo))
+                        {
+                            string query = "";
+                            query = string.Format(@"INSERT INTO ALERTS(FECHA, TIPO, USUARIO, LOTE, CANT_DATOS, DESCRIPCION, ESTADO)
+                                                    VALUES('{0}', '{1}', '{2}', '{3}', {4}, '{5}', '{6}')", DateTime.Now.ToShortDateString(),
+                                                    "CORREGIR", (string)Session["user_logged"], (string)Session["lote"], count, "Corregir Errores e Inconsistencias", "PENDIENTE");
+                            SqlCommand cmd = new SqlCommand(query, conn);
+                            conn.Open();
+                            cmd.ExecuteNonQuery();
+                            conn.Close();
+                        }
+
+                        sendMail(count);
+                    }
+                }
+            }
+            catch (SqlException sqlEx)
+            {
+                LblNomLotVal.Text = sqlEx.Message;
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "myalert", "alert('[ERROR] Ha ocurrido un error, Contactar a Soporte');", true);
+                string sqlerro = "alert('[ERROR DESCRIPTION] " + sqlEx.Message + "');";
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "myalert", sqlerro, true);
+            }
+        }
+
+        protected void sendMail(int cant)
+        {
+            try
+            {
+                MailMessage msg = new MailMessage();
+                msg.Subject = "[" + (string)Session["lote"] + "] - " + cant.ToString() + " Errores e Inconsistencias";
+                msg.From = new MailAddress("sales@touchedbpo.com");
+                msg.To.Add("nicolas.mico@mitec.io");
+                msg.Body = "Hay nuevos registros para corregir, por favor ingrese a: http://ip-del-sistema.ip";
+                msg.IsBodyHtml = true;
+
+                SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587);
+                smtp.EnableSsl = true;
+                NetworkCredential netCre = new NetworkCredential("ventas.lcbsys@gmail.com", "123Cambiazo");
+                smtp.Credentials = netCre;
+
+                smtp.Send(msg);
+
+                string alert;
+                alert = "alert('Se solicitó la corrección de errores("+ cant.ToString() + ") por E-mail!')";
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "WARNING", alert, true);
+            }
+            catch(Exception ex)
+            {
+                string alert = "alert('Error al enviar el mail: "+ ex.Message +"')";
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "WARNING", alert, true);
+            }
+        }
+
+        protected DataTable loadData(DataTable data)
+        {
+            using (var conn = new SqlConnection(connectionInfo))
+            {
+                string q = "SELECT * FROM VAL_DATA WHERE NomLote = '" + (string)Session["lote"] + "'";
+                SqlCommand cmd = new SqlCommand(q, conn);
+                conn.Open();
+                data.Load(cmd.ExecuteReader());
+                conn.Close();
+                return data;
+            }
+        }
+
+        protected DataTable loadWrong()
+        {
+            DataTable data = new DataTable();
+            string q = "";
+            using (var conn = new SqlConnection(connectionInfo))
+            {
+                try
+                {
+                    q = "SELECT * FROM VAL_DATA WHERE NomLote = '" + (string)Session["lote"] + "' and Estado <> 'PROCESADO'";
+                    SqlCommand cmd = new SqlCommand(q, conn);
+                    conn.Open();
+                    data.Load(cmd.ExecuteReader());
+                    conn.Close();
+                    return data;
+                }
+                catch (SqlException sqlEx)
+                { 
+                    LblNomLotVal.Text = "Query: " + q + ". ERROR: " + sqlEx.Message;
+                    return null;
+                }
+            }
+        }
+        protected void RemoveNullColumnFromDataTable(DataTable dt)
+        {
+            for (int i = dt.Rows.Count - 1; i >= 0; i--)
+            {
+                if (dt.Rows[i][1] == DBNull.Value)
+                    dt.Rows[i].Delete();
+            }
+            dt.AcceptChanges();
+        }
+
+        protected void BtnModif_Click(object sender, EventArgs e)
+        {
+            string query = "";
+            DataTable data = new DataTable();
+
+            Button btn = (Button)sender;
+            switch (btn.CommandName)
+            {
+                case "modif":
+                    query = string.Format(@"UPDATE a 
+                                            SET a.Apellido = '{0}', a.Nombre = '{1}', a.TipoDNI = '{2}', a.DNI = '{3}', a.fechaNacimiento = '{4}',
+                                            a.Provincia = '{5}', a.Localidad = '{6}', a.DireCalle = '{7}', a.DireNum = '{8}',
+                                            a.DireDpto = '{9}', a.DirePiso = '{10}', a.cp = '{11}', a.Mail = '{12}', a.TarjetaTipo = '{13}',
+                                            a.TarjetaNum = '{14}', a.TarjetaVence = '{15}', a.Modif = '*', a.UserModif = '{16}'
+                                            FROM VAL_DATA as a
+                                            WHERE a.id = {17}",
+                                            ape.Value.ToString(), nom.Value.ToString(), tDni.Value.ToString(), dni.Value.ToString(), nac.Value.ToString().Replace(" 12:00:00 a. m.", ""),
+                                            prov.Value.ToString(), loc.Value.ToString(), dir.Value.ToString(), num.Value.ToString(), dto.Value.ToString(),
+                                            piso.Value.ToString(), cp.Value.ToString(), mail.Value.ToString(), tipoTc.Value.ToString(), nroTc.Value.ToString(),
+                                            venTc.Value.ToString().Replace(" 12:00:00 a. m.", ""), (string)Session["user_logged"], Hidden1.Value.ToString());
+                    break;
+                case "rech":
+                    query = string.Format(@"UPDATE a SET a.EstadoFinal = 'RECHAZADO', a.Modif = '*', a.UserModif = '{0}' FROM VAL_DATA as a WHERE ID = {1}", (string)Session["user_logged"], Hidden1.Value.ToString());
+                    break;
+            }
+
+            using (var conn = new SqlConnection(connectionInfo))
+            {
+                string q1;
+                q1 = string.Format(@"SELECT count(*) FROM VAL_DATA WHERE NomLote = '{0}' AND Modif is NULL AND Estado <> 'PROCESADO'", (string)Session["lote"]);
+                try
+                {
+                    SqlCommand cmmd = new SqlCommand(query, conn);
+                    SqlCommand cmmd2 = new SqlCommand(q1, conn);
+                    conn.Open();
+                    cmmd.ExecuteNonQuery();
+                    var left = cmmd2.ExecuteScalar();
+                    string q = "";
+                    if ((int)left != 0)
+                    {
+                        q = string.Format(@"UPDATE a SET a.CANT_DATOS = {0}
+                                            FROM ALERTS as a
+                                            WHERE LOTE = '{1}'", (int)left, (string)Session["lote"]);
+
+                    }
+                    else
+                    {
+                        q = string.Format(@"UPDATE a SET a.CANT_DATOS = 0, a.ESTADO = 'LISTO'
+                                            FROM ALERTS as a
+                                            WHERE LOTE = '{0}'", (string)Session["lote"]);
+                    }
+                    SqlCommand cmmd3 = new SqlCommand(q, conn);
+                    cmmd3.ExecuteNonQuery();
+                    conn.Close();
+                    data = loadWrong();
+                    refreshWrong(data);
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "myalert", "alert('Cambios guardados con éxito!');", true);
+                }
+                catch (SqlException sqlEx)
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "myalert", "alert('[ERROR] Ha ocurrido un error, Contactar a Soporte');", true);
+                    LblNomLotVal.Text = "query: " + query + ". ERROR: " + sqlEx.Message;
+                }
+            }
+        }
+
+        protected void refreshWrong(DataTable dt)
+        {
+            int count = 0;
+            StringBuilder html = new StringBuilder();
+
+            html.Append("<thead>");
+            html.Append("<tr>");
+            for (int i = 0; i < dt.Columns.Count - 4; i++)
+            {
+                html.Append("<th>");
+                html.Append(dt.Columns[i].ColumnName.ToString());
+                html.Append("</th>");
+            }
+            html.Append("</tr>");
+            html.Append("</thead>");
+            theadN.Text = html.ToString();
+            //tfootN.Text = html.ToString();
+
+            html.Clear();
+            html.Append("<tbody>");
+            bool flag = false;
+
+            for (int j = 0; j < dt.Rows.Count; j++)
+            {
+                if (dt.Rows[j]["Estado"].ToString() != "PROCESADO")
+                {
+                    count++;
+                    flag = true;
+                    if (dt.Rows[j]["Modif"].ToString() == "*")
+                        html.Append("<tr style=\"color:green;\" data-toggle=\"modal\" data-id=\"");
+                    else
+                        html.Append("<tr style=\"color:red;\" data-toggle=\"modal\" data-id=\"");
+                    html.Append(count.ToString());
+                    html.Append("\" data-target=\"#modalRow\">");
+                }
+                for (int k = 0; k < dt.Columns.Count - 4; k++)
+                {
+                    if (flag)
+                    {
+                        html.Append("<td>");
+                        html.Append(dt.Rows[j][k].ToString());
+                        html.Append("</td>");
+                    }
+                }
+                if (flag)
+                    html.Append("</tr>");
+                flag = false;
+            }
+            html.Append("</tbody>");
+            tbodyN.Text = html.ToString();
+            html.Clear();
+        }
+
+        protected void BtnLogOut_Click(object sender, EventArgs e)
+        {
+            Session.RemoveAll();
+            Response.Redirect("default.aspx");
+        }
+    }
+}

@@ -1,0 +1,7 @@
+OFFICE;CIA;FOLLOW_FECHA;PROPUESTA;DNI;PLAN;FOLLOW_NUMERO;FOLLOW_STATUS;AUDIOS;RESOLUCION;OBSERVACION;FOLLOW_DESC;AUDITORIA_DESC;
+7000;IMP;15/12/2016 11:53:34;79051;18554528;Asistencia Salud Plus Familia $237 2M;1254029;Negativa;;Negativa;Auditada - Negativa;FATAL ERROR ;Audio no coicide con los datos cargados;
+7000;IMP;15/12/2016 12:04:22;79057;5077411;Asistencia Salud Plus Familia $237 2M;1254095;Positiva;;Positiva;Auditada - Positiva;;;
+7000;IMP;15/12/2016 12:21:07;79059;4628313;Asistencia Salud Plus Familia $237 2M;1254110;Positiva;;Positiva;Auditada - Positiva;;;
+7000;IMP;15/12/2016 12:33:28;79061;26664237;Asistencia Salud Plus Familia $237 2M;1254126;Positiva;;Positiva;Auditada - Positiva;;;
+7000;IMP;15/12/2016 12:48:29;79063;20911190;Asistencia Salud Plus Familia $237 2M;1254136;Positiva;;Positiva;Auditada - Positiva;Argumento (General) ;Benef que le corresponde/;
+7000;IMP;15/12/2016 12:56:59;79066;14167415;Asistencia Salud Plus Familia $237 2M;1254143;Positiva;;Positiva;Auditada - Positiva;;;

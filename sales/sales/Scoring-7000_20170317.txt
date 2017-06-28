@@ -1,0 +1,25 @@
+OFFICE;CIA;FOLLOW_FECHA;PROPUESTA;DNI;PLAN;FOLLOW_NUMERO;FOLLOW_STATUS;AUDIOS;RESOLUCION;OBSERVACION;FOLLOW_DESC;AUDITORIA_DESC
+7000;IMP;42810,4250694444;92935;8485123;Asistencia Salud Plus Familia $237 2M;1334970;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,4302777778;92936;13799961;Asistencia Salud Plus Familia $237 2M;1334977;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,4356134259;92937;5626295;Asistencia Salud Plus Familia $237 2M;1334985;Negativa;;Negativa;Auditada - Negativa;FATAL ERROR ;la clente dice varias veces que no activo y que no uso nunca la tc. 
+7000;IMP;42810,4590162037;92938;4987615;Asistencia Salud Plus Familia $237 2M;1335006;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,4677893519;92939;13266568;Asistencia Salud Plus Familia $237 2M;1335007;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,4716435185;92940;12080657;Asistencia Salud Plus Familia $237 2M;1335009;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,4753703704;92941;6212462;Asistencia Salud Plus Familia $237 2M;1335012;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,4837731481;92942;22858584;Asistencia Salud Plus Familia $237 2M;1335022;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,4844791667;92943;4737553;Asistencia Salud Plus Familia $237 2M;1335024;Negativa;;Negativa;Auditada - Negativa;INCONSISTENCIA CRITICA ;me figura que el audio esta da¤ado o mal cargado. 
+7000;IMP;42810,4891087963;92944;32529884;Asistencia Salud Plus Familia $237 2M;1335029;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,5051041667;92945;23638558;Asistencia Salud Plus Familia $237 2M;1335057;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,4981134259;92946;16487382;Asistencia Salud Plus Familia $237 2M;1335047;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,5122685185;92947;13206403;Asistencia Salud Plus Familia $237 2M;1335067;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,5847337963;92948;16555235;Asistencia Salud Plus Familia $237 2M;1335230;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,5676504629;92949;18857626;Asistencia Salud Plus Familia $237 2M;1335138;Positiva;;Negativa;Auditada - Negativa;FATAL ERROR ;
+7000;IMP;42810,5933333333;92950;7646237;Asistencia Salud Plus Familia $237 2M;1335241;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,5986226852;92951;24610837;Asistencia Salud Plus Familia $237 2M;1335245;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,616875;92952;14524217;Asistencia Salud Plus Familia $237 2M;1335414;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,6260416667;92953;25972187;Asistencia Salud Plus Familia $237 2M;1335434;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,6298611111;92954;8372909;Asistencia Salud Plus Familia $237 2M;1335449;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,6402777778;92955;12813531;Asistencia Salud Plus Familia $237 2M;1335481;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,6647685185;92956;25219890;Asistencia Salud Plus Familia $237 2M;1335527;Positiva;;Negativa;Auditada - Negativa;FATAL ERROR ;
+7000;IMP;42810,6732407407;92957;16250735;Asistencia Salud Plus Familia $237 2M;1335545;Positiva;;Positiva;Auditada - Positiva;;
+7000;IMP;42810,4192129629;92958;5771155;Asistencia Salud Plus Familia $237 2M;1334965;Positiva;;Positiva;Auditada - Positiva;;"
